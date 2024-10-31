@@ -10,7 +10,7 @@ Put the following lines in your `.envrc`:
 
 ```sh
 if ! has zvm_direnv_version || ! zvm_direnv_version 1.0.0; then
-  source_url "https://git.lerch.org/lobo/zvm-direnv/1.0.0/direnvrc" #"sha256-RuwIS+QKFj/T9M2TFXScjBsLR6V3A17YVoEW/Q6AZ1w="
+  source_url "https://git.lerch.org/lobo/zvm-direnv/raw/tag/1.0.0/direnvrc" "sha256-Gtddvcr6aJsrjKd53uChxA1reQmJgEBpmPUWmMdtDIQ="
 fi
 ```
 
