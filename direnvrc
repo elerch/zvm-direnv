@@ -44,7 +44,10 @@ use_zig() {
   local version="$1"
   # This is a bad idea, because it will make a global change
   # zvm use $1
-  if [[ "$(zvm ls | grep "$version")" != "$version" ]]; then
+  # 
+  # Check for existence of the version installed in the state directory
+  if [ ! -d "${state_dir}/$version" ]; then
+    log_status "zig/zls version $version not installed - downloading with zvm"
     local current
     # zvm 0.7.9 does not indicate which version is in use, so we have to find
     # the version that was hard linked into the bin directory
