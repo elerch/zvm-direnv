@@ -1,7 +1,7 @@
 # vi: ft=sh
 # shellcheck shell=bash
 
-ZVM_DIRENV_VERSION=1.0.0
+ZVM_DIRENV_VERSION=2.0.0
 
 # Usage: zvm_direnv_version <version_at_least>
 #
@@ -20,6 +20,7 @@ _require_version() {
 }
 
 use_zig() {
+  # ZVM_SET_CU will turn off the upgrade check
   if [[ -z $1 ]]; then
     log_error "Must specify a zig version!"
     return 1
@@ -33,6 +34,13 @@ use_zig() {
     log_error "zvm not installed - please install it from https://www.zvm.app/"
     return 1
   fi
+  local state_dir
+  if ! ZVM_SET_CU=1 zvm env >/dev/null 2>&1; then
+    # zvm env is not available, so we assume all the things are in ZVM_INSTALL
+    state_dir="${ZVM_INSTALL}/.."
+  else
+    state_dir="$(ZVM_SET_CU=1 zvm env |grep -F '"state":' |cut -d: -f2 |cut -d\" -f2)"
+  fi
   local version="$1"
   # This is a bad idea, because it will make a global change
   # zvm use $1
@@ -40,15 +48,19 @@ use_zig() {
     local current
     # zvm 0.7.9 does not indicate which version is in use, so we have to find
     # the version that was hard linked into the bin directory
-    current="$(find "${ZVM_INSTALL}/.." -samefile "${ZVM_INSTALL}/../bin/zig" | \
-      rev | \
-      cut -d/ -f2 | \
-      rev)"
+    # current="$(find "${ZVM_INSTALL}/.." -samefile "${ZVM_INSTALL}/../bin/zig" | \
+    #   rev | \
+    #   cut -d/ -f2 | \
+    #   rev)"
+    #
+    # We will assume a version of zvm that does allow this
+    current="$(ZVM_SET_CU=1 zvm ls --color off |grep -F ' [x]' |cut -d' ' -f1)"
     zvm install --zls "$1" # I think this is safe for all except master
 
     # zvm install will automatically use the installed version, which is normally
     # cool, but in this case, we don't want to do that, so we will revert
     zvm use "$current"
   fi
-  PATH_add "${ZVM_INSTALL}/../$1"
+  # Don't muck with the path - allow this to be done at the system level
+  PATH_add "${state_dir}/$1"
 }
